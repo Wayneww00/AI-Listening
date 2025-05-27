@@ -289,20 +289,21 @@
             border-radius: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             min-width: 200px;
+            position: relative;
         }
 
         .word-meaning {
             font-size: 16px;
             color: #666;
             margin: 5px 0;
-            display: none;
+            display: block;
         }
 
         .word-phonetic {
             font-size: 14px;
             color: #888;
             margin: 5px 0;
-            display: none;
+            display: block;
         }
 
         .feedback-animation {
@@ -520,7 +521,11 @@
 
         .battle-word-meaning {
             text-align: left;
-            display: none;
+            display: block;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 10px;
         }
 
         .battle-controls {
@@ -581,6 +586,78 @@
         .next-word-button:hover {
             background-color: #e64545;
         }
+
+        .toggle-hint {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toggle-hint:hover {
+            color: var(--primary-color);
+        }
+
+        .hint-button {
+            background-color: #FFB100;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .hint-button:hover {
+            background-color: #FF9800;
+        }
+
+        .hint-text {
+            font-size: 16px;
+            color: #666;
+            margin: 10px 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .skip-button {
+            background-color: #9E9E9E;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .skip-button:hover {
+            background-color: #757575;
+        }
+
+        .hint-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
@@ -626,7 +703,7 @@
                         <i class="fas fa-volume-up"></i>
                     </button>
                     
-                    <button class="control-button" onclick="toggleHint()" title="显示提示">
+                    <button class="control-button" onclick="toggleHint('single')" title="显示提示">
                         <i class="fas fa-lightbulb"></i>
                     </button>
                     
@@ -639,6 +716,10 @@
             <div class="word-section">
                 <img id="wordImage" class="word-image" src="" alt="单词图片">
                 <div class="word-info">
+                    <button class="toggle-hint" onclick="toggleHint('single')">
+                        <i class="fas fa-eye-slash"></i>
+                        <span>隐藏释义</span>
+                    </button>
                     <div id="wordPhonetic" class="word-phonetic"></div>
                     <div id="wordMeaning" class="word-meaning"></div>
                 </div>
@@ -650,6 +731,17 @@
                     <div class="input-lines"></div>
                     <div class="input-lines"></div>
                     <input type="text" id="wordInput" placeholder="请输入听到的单词" autocomplete="off">
+                    <div class="hint-container">
+                        <div id="hintText" class="hint-text"></div>
+                        <button class="hint-button" onclick="showHint()">
+                            <i class="fas fa-lightbulb"></i>
+                            获取提示
+                        </button>
+                        <button class="skip-button" onclick="skipWord()">
+                            <i class="fas fa-forward"></i>
+                            跳过
+                        </button>
+                    </div>
                     <button class="submit-button" onclick="submitWord()">Submit</button>
                 </div>
             </div>
@@ -688,7 +780,7 @@
                     <button class="control-button" onclick="playCurrentBattleWord()" title="播放音频">
                         <i class="fas fa-volume-up"></i>
                     </button>
-                    <button class="control-button" onclick="toggleBattleHint()" title="显示提示">
+                    <button class="control-button" onclick="toggleHint('battle')" title="显示提示">
                         <i class="fas fa-lightbulb"></i>
                     </button>
                     <button class="exit-button" onclick="exitBattleMode()">
@@ -701,9 +793,13 @@
             <div class="battle-word-section">
                 <div class="battle-word-info">
                     <img id="battleWordImage" class="battle-word-image" src="" alt="单词图片">
-                    <div id="battleWordMeaning" class="battle-word-meaning">
-                        <p id="battleWordPhonetic"></p>
-                        <p id="battleWordTranslation"></p>
+                    <div class="word-info">
+                        <button class="toggle-hint" onclick="toggleHint('battle')">
+                            <i class="fas fa-eye-slash"></i>
+                            <span>隐藏释义</span>
+                        </button>
+                        <div id="battleWordPhonetic" class="word-phonetic"></div>
+                        <div id="battleWordMeaning" class="battle-word-meaning"></div>
                     </div>
                 </div>
             </div>
@@ -715,6 +811,17 @@
                         <div class="player-score" id="player1Score">0</div>
                     </div>
                     <input type="text" class="player-input" id="player1Input" placeholder="输入听到的单词" onkeypress="handlePlayerKeyPress(event, 1)">
+                    <div class="hint-container">
+                        <div id="player1HintText" class="hint-text"></div>
+                        <button class="hint-button" onclick="showBattleHint(1)">
+                            <i class="fas fa-lightbulb"></i>
+                            获取提示
+                        </button>
+                        <button class="skip-button" onclick="skipBattleWord(1)">
+                            <i class="fas fa-forward"></i>
+                            跳过
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="vs-section">VS</div>
@@ -725,6 +832,17 @@
                         <div class="player-score" id="player2Score">0</div>
                     </div>
                     <input type="text" class="player-input" id="player2Input" placeholder="输入听到的单词" onkeypress="handlePlayerKeyPress(event, 2)">
+                    <div class="hint-container">
+                        <div id="player2HintText" class="hint-text"></div>
+                        <button class="hint-button" onclick="showBattleHint(2)">
+                            <i class="fas fa-lightbulb"></i>
+                            获取提示
+                        </button>
+                        <button class="skip-button" onclick="skipBattleWord(2)">
+                            <i class="fas fa-forward"></i>
+                            跳过
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -780,7 +898,8 @@
         let streakCount = 0;
         let currentDifficulty = 'beginner';
         let mistakeWords = [];
-        let hintVisible = false;
+        let singleModeHintVisible = true;
+        let battleModeHintVisible = true;
 
         let battleWords = [];
         let currentBattleIndex = 0;
@@ -790,6 +909,10 @@
         let player1Answered = false; // 玩家1是否已答题
         let player2Answered = false; // 玩家2是否已答题
         let autoProgressTimer = null; // 自动进入下一题的计时器
+
+        let hintLevel = 0; // 提示级别
+        let player1HintLevel = 0;
+        let player2HintLevel = 0;
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -861,6 +984,11 @@
             player2Input.disabled = true;
             player1Input.placeholder = "轮到你答题了";
             player2Input.placeholder = "等待对方答题";
+
+            player1HintLevel = 0;
+            player2HintLevel = 0;
+            document.getElementById('player1HintText').textContent = '';
+            document.getElementById('player2HintText').textContent = '';
         }
 
         function updatePlayerTurn() {
@@ -1029,16 +1157,37 @@
             document.getElementById('wordMeaning').textContent = currentWord.meaning;
             document.querySelector('.progress-number').textContent = `${currentWordIndex + 1}/${currentWords.length}`;
             
-            // 重置提示的显示状态
-            document.getElementById('wordPhonetic').style.display = 'none';
-            document.getElementById('wordMeaning').style.display = 'none';
-            hintVisible = false;
+            // 根据当前状态显示或隐藏释义
+            document.getElementById('wordPhonetic').style.display = singleModeHintVisible ? 'block' : 'none';
+            document.getElementById('wordMeaning').style.display = singleModeHintVisible ? 'block' : 'none';
         }
 
-        function toggleHint() {
-            hintVisible = !hintVisible;
-            document.getElementById('wordPhonetic').style.display = hintVisible ? 'block' : 'none';
-            document.getElementById('wordMeaning').style.display = hintVisible ? 'block' : 'none';
+        function toggleHint(mode) {
+            const button = event.currentTarget;
+            const icon = button.querySelector('i');
+            const text = button.querySelector('span');
+            
+            if (mode === 'single') {
+                singleModeHintVisible = !singleModeHintVisible;
+                const phonetic = document.getElementById('wordPhonetic');
+                const meaning = document.getElementById('wordMeaning');
+                
+                phonetic.style.display = singleModeHintVisible ? 'block' : 'none';
+                meaning.style.display = singleModeHintVisible ? 'block' : 'none';
+                
+                icon.className = singleModeHintVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                text.textContent = singleModeHintVisible ? '隐藏释义' : '显示释义';
+            } else {
+                battleModeHintVisible = !battleModeHintVisible;
+                const phonetic = document.getElementById('battleWordPhonetic');
+                const meaning = document.getElementById('battleWordMeaning');
+                
+                phonetic.style.display = battleModeHintVisible ? 'block' : 'none';
+                meaning.style.display = battleModeHintVisible ? 'block' : 'none';
+                
+                icon.className = battleModeHintVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                text.textContent = battleModeHintVisible ? '隐藏释义' : '显示释义';
+            }
         }
 
         function createConfetti() {
@@ -1185,6 +1334,8 @@
             document.getElementById('wordInput').value = '';
             document.querySelector('.input-section').style.display = 'block';
             document.getElementById('resultSection').style.display = 'none';
+            hintLevel = 0;
+            document.getElementById('hintText').textContent = '';
         }
 
         function updateBattleWordDisplay() {
@@ -1192,13 +1343,108 @@
             document.getElementById('battleWordImage').src = currentWord.image;
             document.getElementById('battleWordPhonetic').textContent = currentWord.phonetic;
             document.getElementById('battleWordTranslation').textContent = currentWord.meaning;
-            document.getElementById('battleWordMeaning').style.display = 'none';
             document.querySelector('.progress-number').textContent = `${currentBattleIndex + 1}/10`;
+            
+            // 根据当前状态显示或隐藏释义
+            document.getElementById('battleWordPhonetic').style.display = battleModeHintVisible ? 'block' : 'none';
+            document.getElementById('battleWordMeaning').style.display = battleModeHintVisible ? 'block' : 'none';
         }
 
-        function toggleBattleHint() {
-            const meaning = document.getElementById('battleWordMeaning');
-            meaning.style.display = meaning.style.display === 'none' ? 'block' : 'none';
+        function getWordHint(word, level) {
+            if (level === 0) {
+                // 显示单词长度和首字母
+                return word[0] + '_ '.repeat(word.length - 1);
+            } else if (level === 1) {
+                // 显示单词的首尾字母
+                return word[0] + '_ '.repeat(word.length - 2) + word[word.length - 1];
+            } else if (level === 2) {
+                // 显示所有元音字母
+                return word.split('').map(char => 
+                    'aeiouAEIOU'.includes(char) ? char : '_'
+                ).join(' ');
+            } else {
+                // 显示所有字母，但随机隐藏30%
+                return word.split('').map(char => 
+                    Math.random() > 0.3 ? char : '_'
+                ).join(' ');
+            }
+        }
+
+        function showHint() {
+            const currentWord = currentWords[currentWordIndex].word;
+            const hintText = document.getElementById('hintText');
+            hintText.textContent = getWordHint(currentWord, hintLevel);
+            hintLevel = (hintLevel + 1) % 4;
+        }
+
+        function skipWord() {
+            // 记录到错题本
+            if (!mistakeWords.includes(currentWords[currentWordIndex])) {
+                mistakeWords.push(currentWords[currentWordIndex]);
+            }
+            
+            // 重置提示级别
+            hintLevel = 0;
+            document.getElementById('hintText').textContent = '';
+            
+            // 显示正确答案
+            const currentWord = currentWords[currentWordIndex].word;
+            alert(`正确答案是: ${currentWord}`);
+            
+            // 进入下一题
+            if (currentWordIndex < currentWords.length - 1) {
+                currentWordIndex++;
+                document.getElementById('wordInput').value = '';
+                updateWordDisplay();
+                playCurrentWord();
+            } else {
+                showResults();
+            }
+        }
+
+        function showBattleHint(playerNumber) {
+            if (playerNumber !== currentPlayer) return;
+            
+            const currentWord = battleWords[currentBattleIndex].word;
+            const hintText = document.getElementById(`player${playerNumber}HintText`);
+            const hintLevel = playerNumber === 1 ? player1HintLevel : player2HintLevel;
+            
+            hintText.textContent = getWordHint(currentWord, hintLevel);
+            
+            if (playerNumber === 1) {
+                player1HintLevel = (player1HintLevel + 1) % 4;
+            } else {
+                player2HintLevel = (player2HintLevel + 1) % 4;
+            }
+        }
+
+        function skipBattleWord(playerNumber) {
+            if (playerNumber !== currentPlayer) return;
+            
+            // 重置该玩家的提示级别
+            if (playerNumber === 1) {
+                player1HintLevel = 0;
+                document.getElementById('player1HintText').textContent = '';
+                player1Answered = true;
+            } else {
+                player2HintLevel = 0;
+                document.getElementById('player2HintText').textContent = '';
+                player2Answered = true;
+            }
+            
+            // 显示正确答案
+            const currentWord = battleWords[currentBattleIndex].word;
+            alert(`正确答案是: ${currentWord}`);
+            
+            // 切换到另一个玩家或进入下一题
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updatePlayerTurn();
+            
+            if (player1Answered && player2Answered) {
+                setTimeout(() => {
+                    goToNextWord();
+                }, 2000);
+            }
         }
 
         document.getElementById('wordInput').addEventListener('keypress', function(e) {
